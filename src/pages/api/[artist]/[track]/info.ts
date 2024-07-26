@@ -5,9 +5,6 @@ export const prerender = false;
 
 export async function GET({ params, request }: { params: any, request: any }) {
 
-  // const urlSearchParams = new URLSearchParams(window.location.search);
-  // const paramss = Object.fromEntries(urlSearchParams.entries());
-
   if (!params.artist || !params.track) {
     return new Response(null, {
       status: 422,
