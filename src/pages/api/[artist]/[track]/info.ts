@@ -5,12 +5,14 @@ export const prerender = false;
 
 export async function GET({ params, request }: { params: any, request: any }) {
   
-  request.setHeader('Access-Control-Allow-Origin', '*')
+  const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', '*');
 
   if (!params.artist || !params.track) {
     return new Response(null, {
       status: 422,
       statusText: 'Track or artist missing.',
+      headers: headers, // Include headers in the response
     });
   }
   
@@ -22,6 +24,7 @@ export async function GET({ params, request }: { params: any, request: any }) {
     status: 200,
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*", // Set the CORS header
     },
   });
 }
