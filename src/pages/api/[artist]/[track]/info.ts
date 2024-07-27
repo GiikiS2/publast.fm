@@ -4,6 +4,8 @@ export const prerender = false;
 
 
 export async function GET({ params, request }: { params: any, request: any }) {
+  
+  request.setHeader('Access-Control-Allow-Origin', '*')
 
   if (!params.artist || !params.track) {
     return new Response(null, {
