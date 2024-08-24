@@ -60,18 +60,19 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
             if (matchingRecording && matchingRecording.releases.length > 0) {
                 const img = await attemptFetchCoverArt(matchingRecording.releases[0].id);
                 if (img) {
+                    var buffer
                     await axios.get(img, {
                         responseType: 'arraybuffer',
-                        timeout: 20000 // only wait for 2s
+                        // timeout: 20000 // only wait for 2s
                     }).then(response => {
                         console.log(response.data)
-                        const buffer = Buffer.from(response.data, 'binary')
+                        buffer = Buffer.from(response.data, 'binary')
                         cache.set(cacheKey, buffer); // Cache the image buffer
-                        return buffer;
+                        // buffer;
                     })
                     // const imageBuffer2 = await getBase64(img)
                     // cache.set(cacheKey, imageBuffer2); // Cache the image buffer
-                    // return imageBuffer2;
+                    return buffer;
                 }
             }
 
@@ -83,19 +84,19 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
                 for (const release of matching.releases) {
                     const img = await attemptFetchCoverArt(release.id);
                     if (img) {
+                        var buffer
                         await axios.get(img, {
                             responseType: 'arraybuffer',
-                            timeout: 20000 // only wait for 2s
+                            // timeout: 20000 // only wait for 2s
                         }).then(response => {
                             console.log(response.data)
-                            const buffer = Buffer.from(response.data, 'binary')
+                            buffer = Buffer.from(response.data, 'binary')
                             cache.set(cacheKey, buffer); // Cache the image buffer
-                            return buffer;
+                            // buffer;
                         })
-                        // console.log(img)
                         // const imageBuffer2 = await getBase64(img)
                         // cache.set(cacheKey, imageBuffer2); // Cache the image buffer
-                        // return imageBuffer2;
+                        return buffer;
                     }
                 }
             }
