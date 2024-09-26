@@ -119,16 +119,12 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
         console.error(`Error fetching cover art:`, error);
         return null;
     }
-    const defaultImageUrl = '/result.png'; // Replace with your hosted image URL
-    try {
-        const defaultImageResponse = await axios.get(defaultImageUrl, {
+    
+        const defaultImageResponse = await axios.get('https://publast-fm.vercel.app/result.png', {
             responseType: 'arraybuffer',
         });
         return Buffer.from(defaultImageResponse.data, 'binary');
-    } catch (error) {
-        console.error('Error fetching default image:', error);
-        throw error; // Handle this error appropriately
-    }
+    
 }
 
 export async function GET({ params, request }: { params: any, request: any }) {
@@ -154,6 +150,16 @@ console.log(imageBuffer)
             },
         });
     } else {
+        const defaultImageResponse = await axios.get('https://publast-fm.vercel.app/result.png', {
+            responseType: 'arraybuffer',
+        });
+        return new Response(Buffer.from(defaultImageResponse.data, 'binary'), {
+            status: 200,
+            headers: {
+                "Content-Type": "image/jpeg",
+                "Access-Control-Allow-Origin": "*", // Set the CORS header
+            },
+        });
         return new Response('Image not found', {
             status: 404,
             headers: {
