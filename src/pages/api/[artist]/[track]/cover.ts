@@ -16,6 +16,7 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
     const attemptFetchCoverArt = async (releaseId: string): Promise<string | null> => {
         try {
             const coverArtUrl = `https://coverartarchive.org/release/${releaseId}/front-500`;
+            console.log(coverArtUrl)
             const response = await axios.get(coverArtUrl);
             return coverArtUrl;
         } catch (error) {
@@ -40,22 +41,27 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
             const coverArtUrl = img.data.track.album.image[3]['#text'];
             const imageBuffer = await getBase64(coverArtUrl)
             cache.set(cacheKey, imageBuffer); // Cache the image buffer
+            
+            console.log(coverArtUrl)
             return imageBuffer;
         }
 
         try {
             const url = `https://musicbrainz.org/ws/2/recording/?query=artistname:${encodeURIComponent(artistName)}%20AND%20recording:${encodeURIComponent(trackName)}&fmt=json`;
             const imgResponse = await axios.get(url);
-            if (imgResponse.status >= 200 && imgResponse.status < 300) {
-                console.log('Response data:', imgResponse.data);
+            if (imgResponse.status === 200 ) {
+                
+            console.log('Response data:', imgResponse.data);
             } else {
                 console.error(`Request failed with status code: ${imgResponse.status}`);
-            }
 
-            const matchingRecording = imgResponse.data.recordings.find((rec: any) =>
+        }
+        
+            const matchingRecording = imgResponse.data?.recordings.find((rec: any) =>
                 rec.video === true &&
                 rec.releases && rec.releases.length > 0
             );
+
 
             if (matchingRecording && matchingRecording.releases.length > 0) {
                 const img = await attemptFetchCoverArt(matchingRecording.releases[0].id);
@@ -65,7 +71,8 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
                         responseType: 'arraybuffer',
                         // timeout: 20000 // only wait for 2s
                     }).then(response => {
-                        console.log(response.data)
+                        
+            console.log(response.data)
                         buffer = Buffer.from(response.data, 'binary')
                         cache.set(cacheKey, buffer); // Cache the image buffer
                         // buffer;
@@ -75,10 +82,11 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
                     return buffer;
                 }
             }
-
+            
             const matching = imgResponse.data.recordings.find((rec: any) =>
                 rec.releases && rec.releases.length > 0
             );
+            
 
             if (matching && matching.releases.length > 0) {
                 for (const release of matching.releases) {
@@ -89,7 +97,8 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
                             responseType: 'arraybuffer',
                             // timeout: 20000 // only wait for 2s
                         }).then(response => {
-                            console.log(response.data)
+                            
+            console.log(response.data)
                             buffer = Buffer.from(response.data, 'binary')
                             cache.set(cacheKey, buffer); // Cache the image buffer
                             // buffer;
@@ -100,6 +109,8 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
                     }
                 }
             }
+
+            
         } catch (error) {
             console.error(`Error contacting musicBrainz api:`, error);
             return null;
@@ -107,6 +118,16 @@ async function fetchCoverArtUrl(artistName: string, trackName: string): Promise<
     } catch (error) {
         console.error(`Error fetching cover art:`, error);
         return null;
+    }
+    const defaultImageUrl = '/result.png'; // Replace with your hosted image URL
+    try {
+        const defaultImageResponse = await axios.get(defaultImageUrl, {
+            responseType: 'arraybuffer',
+        });
+        return Buffer.from(defaultImageResponse.data, 'binary');
+    } catch (error) {
+        console.error('Error fetching default image:', error);
+        throw error; // Handle this error appropriately
     }
 }
 
@@ -123,7 +144,7 @@ export async function GET({ params, request }: { params: any, request: any }) {
     }
 
     const imageBuffer = await fetchCoverArtUrl(params.artist, params.track);
-
+console.log(imageBuffer)
     if (imageBuffer) {
         return new Response(imageBuffer, {
             status: 200,
